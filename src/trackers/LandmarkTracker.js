@@ -1,4 +1,4 @@
-const Tracker = require('./Tracker');
+const ObjectTracker = require('./ObjectTracker');
 const ViolaJones = require('../training').ViolaJones;
 
 /**
@@ -8,7 +8,10 @@ const ViolaJones = require('../training').ViolaJones;
  *     object classifiers to track.
  * @extends {Tracker}
  */
-class LandmarkTracker extends Tracker {
+class LandmarkTracker extends ObjectTracker {
+  constructor(opt_classifiers) {
+    super(opt_classifiers);
+  }
 }
 
 /**
