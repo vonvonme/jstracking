@@ -40,3 +40,5 @@ LandmarkTracker.prototype.track = function(pixels, width, height) {
     }
   });
 };
+
+module.exports = LandmarkTracker;
