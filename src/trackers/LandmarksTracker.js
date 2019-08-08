@@ -2,13 +2,13 @@ const ObjectTracker = require('./ObjectTracker');
 const ViolaJones = require('../training').ViolaJones;
 
 /**
- * LandmarkTracker utility.
+ * LandmarksTracker utility.
  * @constructor
  * @param {string|Array.<string|Array.<number>>} opt_classifiers Optional
  *     object classifiers to track.
  * @extends {ObjectTracker}
  */
-class LandmarkTracker extends ObjectTracker {
+class LandmarksTracker extends ObjectTracker {
   constructor(opt_classifiers) {
     super(opt_classifiers);
   }
@@ -21,7 +21,7 @@ class LandmarkTracker extends ObjectTracker {
  * @param {number} width The pixels canvas width.
  * @param {number} height The pixels canvas height.
  */
-LandmarkTracker.prototype.track = function(pixels, width, height) {
+LandmarksTracker.prototype.track = function(pixels, width, height) {
   const image = {
     'data': pixels,
     'width': width,
@@ -44,4 +44,4 @@ LandmarkTracker.prototype.track = function(pixels, width, height) {
   });
 };
 
-module.exports = LandmarkTracker;
+module.exports = LandmarksTracker;

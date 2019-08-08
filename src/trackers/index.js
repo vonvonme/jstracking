@@ -2,11 +2,11 @@ const ColorTracker = require('./ColorTracker');
 const ObjectTracker = require('./ObjectTracker');
 const Tracker = require('./Tracker');
 const TrackerTask = require('./TrackerTask');
-const LandmarkTracker = require('./LandmarkTracker')
+const LandmarksTracker = require('./LandmarksTracker')
 
 const trackers = {
   ColorTracker,
-  LandmarkTracker,
+  LandmarksTracker,
   ObjectTracker,
   Tracker,
   TrackerTask
