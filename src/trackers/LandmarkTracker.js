@@ -6,7 +6,7 @@ const ViolaJones = require('../training').ViolaJones;
  * @constructor
  * @param {string|Array.<string|Array.<number>>} opt_classifiers Optional
  *     object classifiers to track.
- * @extends {Tracker}
+ * @extends {ObjectTracker}
  */
 class LandmarkTracker extends ObjectTracker {
   constructor(opt_classifiers) {
