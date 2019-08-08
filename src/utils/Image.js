@@ -19,22 +19,22 @@ Image.blur = function(pixels, width, height, diameter) {
   if (diameter <= 1) {
     throw new Error('Diameter should be greater than 1.');
   }
-  let radius = diameter / 2;
-  let len = Math.ceil(diameter) + (1 - (Math.ceil(diameter) % 2));
-  let weights = new Float32Array(len);
-  let rho = (radius + 0.5) / 3;
-  let rhoSq = rho * rho;
-  let gaussianFactor = 1 / Math.sqrt(2 * Math.PI * rhoSq);
-  let rhoFactor = -1 / (2 * rho * rho);
-  let wsum = 0;
-  let middle = Math.floor(len / 2);
-  for (let i = 0; i < len; i++) {
-    let x = i - middle;
-    let gx = gaussianFactor * Math.exp(x * x * rhoFactor);
+  var radius = diameter / 2;
+  var len = Math.ceil(diameter) + (1 - (Math.ceil(diameter) % 2));
+  var weights = new Float32Array(len);
+  var rho = (radius + 0.5) / 3;
+  var rhoSq = rho * rho;
+  var gaussianFactor = 1 / Math.sqrt(2 * Math.PI * rhoSq);
+  var rhoFactor = -1 / (2 * rho * rho);
+  var wsum = 0;
+  var middle = Math.floor(len / 2);
+  for (var i = 0; i < len; i++) {
+    var x = i - middle;
+    var gx = gaussianFactor * Math.exp(x * x * rhoFactor);
     weights[i] = gx;
     wsum += gx;
   }
-  for (let j = 0; j < weights.length; j++) {
+  for (var j = 0; j < weights.length; j++) {
     weights[j] /= wsum;
   }
   return this.separableConvolve(pixels, width, height, weights, weights, false);
@@ -60,19 +60,18 @@ Image.blur = function(pixels, width, height, diameter) {
  *     specified compute sobel filtering will be skipped.
  * @static
  */
-Image.computeIntegralImage = function(pixels, width, height, opt_integralImage,
-                                      opt_integralImageSquare, opt_tiltedIntegralImage, opt_integralImageSobel) {
+Image.computeIntegralImage = function(pixels, width, height, opt_integralImage, opt_integralImageSquare, opt_tiltedIntegralImage, opt_integralImageSobel) {
   if (arguments.length < 4) {
     throw new Error('You should specify at least one output array in the order: sum, square, tilted, sobel.');
   }
-  let pixelsSobel;
+  var pixelsSobel;
   if (opt_integralImageSobel) {
     pixelsSobel = Image.sobel(pixels, width, height);
   }
-  for (let i = 0; i < height; i++) {
-    for (let j = 0; j < width; j++) {
-      let w = i * width * 4 + j * 4;
-      let pixel = ~~(pixels[w] * 0.299 + pixels[w + 1] * 0.587 + pixels[w + 2] * 0.114);
+  for (var i = 0; i < height; i++) {
+    for (var j = 0; j < width; j++) {
+      var w = i * width * 4 + j * 4;
+      var pixel = ~~(pixels[w] * 0.299 + pixels[w + 1] * 0.587 + pixels[w + 2] * 0.114);
       if (opt_integralImage) {
         this.computePixelValueSAT_(opt_integralImage, width, i, j, pixel);
       }
@@ -80,8 +79,8 @@ Image.computeIntegralImage = function(pixels, width, height, opt_integralImage,
         this.computePixelValueSAT_(opt_integralImageSquare, width, i, j, pixel * pixel);
       }
       if (opt_tiltedIntegralImage) {
-        let w1 = w - width * 4;
-        let pixelAbove = ~~(pixels[w1] * 0.299 + pixels[w1 + 1] * 0.587 + pixels[w1 + 2] * 0.114);
+        var w1 = w - width * 4;
+        var pixelAbove = ~~(pixels[w1] * 0.299 + pixels[w1 + 1] * 0.587 + pixels[w1 + 2] * 0.114);
         this.computePixelValueRSAT_(opt_tiltedIntegralImage, width, i, j, pixel, pixelAbove || 0);
       }
       if (opt_integralImageSobel) {
@@ -108,9 +107,8 @@ Image.computeIntegralImage = function(pixels, width, height, opt_integralImage,
  * @private
  */
 Image.computePixelValueRSAT_ = function(RSAT, width, i, j, pixel, pixelAbove) {
-  let w = i * width + j;
-  RSAT[w] = (RSAT[w - width - 1] || 0) + (RSAT[w - width + 1] || 0) -
-    (RSAT[w - width - width] || 0) + pixel + pixelAbove;
+  var w = i * width + j;
+  RSAT[w] = (RSAT[w - width - 1] || 0) + (RSAT[w - width + 1] || 0) - (RSAT[w - width - width] || 0) + pixel + pixelAbove;
 };
 
 /**
@@ -129,44 +127,81 @@ Image.computePixelValueRSAT_ = function(RSAT, width, i, j, pixel, pixelAbove) {
  * @private
  */
 Image.computePixelValueSAT_ = function(SAT, width, i, j, pixel) {
-  let w = i * width + j;
+  var w = i * width + j;
   SAT[w] = (SAT[w - width] || 0) + (SAT[w - 1] || 0) + pixel - (SAT[w - width - 1] || 0);
 };
 
 /**
- * Converts a color from a colorspace based on an RGB color model to a
+ * Converts a color from a color-space based on an RGB color model to a
  * grayscale representation of its luminance. The coefficients represent the
  * measured intensity perception of typical trichromat humans, in
  * particular, human vision is most sensitive to green and least sensitive
  * to blue.
- * @param {pixels} pixels The pixels in a linear [r,g,b,a,...] array.
+ * @param {Uint8Array|Uint8ClampedArray|Array} pixels The pixels in a linear [r,g,b,a,...] array.
  * @param {number} width The image width.
  * @param {number} height The image height.
  * @param {boolean} fillRGBA If the result should fill all RGBA values with the gray scale
  *  values, instead of returning a single value per pixel.
- * @param {Uint8ClampedArray} The grayscale pixels in a linear array ([p,p,p,a,...] if fillRGBA
+ * @return {Uint8Array} The grayscale pixels in a linear array ([p,p,p,a,...] if fillRGBA
  *  is true and [p1, p2, p3, ...] if fillRGBA is false).
  * @static
  */
 Image.grayscale = function(pixels, width, height, fillRGBA) {
-  let gray = new Uint8ClampedArray(fillRGBA ? pixels.length : pixels.length >> 2);
-  let p = 0;
-  let w = 0;
-  for (let i = 0; i < height; i++) {
-    for (let j = 0; j < width; j++) {
-      let value = pixels[w] * 0.299 + pixels[w + 1] * 0.587 + pixels[w + 2] * 0.114;
-      gray[p++] = value;
 
-      if (fillRGBA) {
-        gray[p++] = value;
-        gray[p++] = value;
-        gray[p++] = pixels[w + 3];
-      }
+  /*
+    Performance result (rough EST. - image size, CPU arch. will affect):
+    https://jsperf.com/tracking-new-image-to-grayscale
 
-      w += 4;
+    Firefox v.60b:
+          fillRGBA  Gray only
+    Old      11       551     OPs/sec
+    New    3548      6487     OPs/sec
+    ---------------------------------
+            322.5x     11.8x  faster
+
+    Chrome v.67b:
+          fillRGBA  Gray only
+    Old     291       489     OPs/sec
+    New    6975      6635     OPs/sec
+    ---------------------------------
+            24.0x      13.6x  faster
+
+    - Ken Nilsen / epistemex
+   */
+
+  var len = pixels.length>>2;
+  var gray = fillRGBA ? new Uint32Array(len) : new Uint8Array(len);
+  var data32 = new Uint32Array(pixels.buffer || new Uint8Array(pixels).buffer);
+  var i = 0;
+  var c = 0;
+  var luma = 0;
+
+  // unrolled loops to not have to check fillRGBA each iteration
+  if (fillRGBA) {
+    while(i < len) {
+      // Entire pixel in little-endian order (ABGR)
+      c = data32[i];
+
+      // Using the more up-to-date REC/BT.709 approx. weights for luma instead: [0.2126, 0.7152, 0.0722].
+      //   luma = ((c>>>16 & 0xff) * 0.2126 + (c>>>8 & 0xff) * 0.7152 + (c & 0xff) * 0.0722 + 0.5)|0;
+      // But I'm using scaled integers here for speed (x 0xffff). This can be improved more using 2^n
+      //   close to the factors allowing for shift-ops (i.e. 4732 -> 4096 => .. (c&0xff) << 12 .. etc.)
+      //   if "accuracy" is not important (luma is anyway an visual approx.):
+      luma = ((c>>>16&0xff) * 13933 + (c>>>8&0xff) * 46871 + (c&0xff) * 4732)>>>16;
+      gray[i++] = luma * 0x10101 | c & 0xff000000;
     }
   }
-  return gray;
+  else {
+    while(i < len) {
+      c = data32[i];
+      luma = ((c>>>16&0xff) * 13933 + (c>>>8&0xff) * 46871 + (c&0xff) * 4732)>>>16;
+      // ideally, alpha should affect value here: value * (alpha/255) or with shift-ops for the above version
+      gray[i++] = luma;
+    }
+  }
+
+  // Consolidate array view to byte component format independent of source view
+  return new Uint8Array(gray.buffer);
 };
 
 /**
@@ -185,25 +220,25 @@ Image.grayscale = function(pixels, width, height, fillRGBA) {
  * @return {array} The convoluted pixels in a linear [r,g,b,a,...] array.
  */
 Image.horizontalConvolve = function(pixels, width, height, weightsVector, opaque) {
-  let side = weightsVector.length;
-  let halfSide = Math.floor(side / 2);
-  let output = new Float32Array(width * height * 4);
-  let alphaFac = opaque ? 1 : 0;
+  var side = weightsVector.length;
+  var halfSide = Math.floor(side / 2);
+  var output = new Float32Array(width * height * 4);
+  var alphaFac = opaque ? 1 : 0;
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let sy = y;
-      let sx = x;
-      let offset = (y * width + x) * 4;
-      let r = 0;
-      let g = 0;
-      let b = 0;
-      let a = 0;
-      for (let cx = 0; cx < side; cx++) {
-        let scy = sy;
-        let scx = Math.min(width - 1, Math.max(0, sx + cx - halfSide));
-        let poffset = (scy * width + scx) * 4;
-        let wt = weightsVector[cx];
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      var sy = y;
+      var sx = x;
+      var offset = (y * width + x) * 4;
+      var r = 0;
+      var g = 0;
+      var b = 0;
+      var a = 0;
+      for (var cx = 0; cx < side; cx++) {
+        var scy = sy;
+        var scx = Math.min(width - 1, Math.max(0, sx + cx - halfSide));
+        var poffset = (scy * width + scx) * 4;
+        var wt = weightsVector[cx];
         r += pixels[poffset] * wt;
         g += pixels[poffset + 1] * wt;
         b += pixels[poffset + 2] * wt;
@@ -234,25 +269,25 @@ Image.horizontalConvolve = function(pixels, width, height, weightsVector, opaque
  * @return {array} The convoluted pixels in a linear [r,g,b,a,...] array.
  */
 Image.verticalConvolve = function(pixels, width, height, weightsVector, opaque) {
-  let side = weightsVector.length;
-  let halfSide = Math.floor(side / 2);
-  let output = new Float32Array(width * height * 4);
-  let alphaFac = opaque ? 1 : 0;
+  var side = weightsVector.length;
+  var halfSide = Math.floor(side / 2);
+  var output = new Float32Array(width * height * 4);
+  var alphaFac = opaque ? 1 : 0;
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let sy = y;
-      let sx = x;
-      let offset = (y * width + x) * 4;
-      let r = 0;
-      let g = 0;
-      let b = 0;
-      let a = 0;
-      for (let cy = 0; cy < side; cy++) {
-        let scy = Math.min(height - 1, Math.max(0, sy + cy - halfSide));
-        let scx = sx;
-        let poffset = (scy * width + scx) * 4;
-        let wt = weightsVector[cy];
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      var sy = y;
+      var sx = x;
+      var offset = (y * width + x) * 4;
+      var r = 0;
+      var g = 0;
+      var b = 0;
+      var a = 0;
+      for (var cy = 0; cy < side; cy++) {
+        var scy = Math.min(height - 1, Math.max(0, sy + cy - halfSide));
+        var scx = sx;
+        var poffset = (scy * width + scx) * 4;
+        var wt = weightsVector[cy];
         r += pixels[poffset] * wt;
         g += pixels[poffset + 1] * wt;
         b += pixels[poffset + 2] * wt;
@@ -284,7 +319,7 @@ Image.verticalConvolve = function(pixels, width, height, weightsVector, opaque) 
  * @return {array} The convoluted pixels in a linear [r,g,b,a,...] array.
  */
 Image.separableConvolve = function(pixels, width, height, horizWeights, vertWeights, opaque) {
-  let vertical = this.verticalConvolve(pixels, width, height, vertWeights, opaque);
+  var vertical = this.verticalConvolve(pixels, width, height, vertWeights, opaque);
   return this.horizontalConvolve(vertical, width, height, horizWeights, opaque);
 };
 
@@ -302,16 +337,16 @@ Image.separableConvolve = function(pixels, width, height, horizWeights, vertWeig
  */
 Image.sobel = function(pixels, width, height) {
   pixels = this.grayscale(pixels, width, height, true);
-  let output = new Float32Array(width * height * 4);
-  let sobelSignVector = new Float32Array([-1, 0, 1]);
-  let sobelScaleVector = new Float32Array([1, 2, 1]);
-  let vertical = this.separableConvolve(pixels, width, height, sobelSignVector, sobelScaleVector);
-  let horizontal = this.separableConvolve(pixels, width, height, sobelScaleVector, sobelSignVector);
+  var output = new Float32Array(width * height * 4);
+  var sobelSignVector = new Float32Array([-1, 0, 1]);
+  var sobelScaleVector = new Float32Array([1, 2, 1]);
+  var vertical = this.separableConvolve(pixels, width, height, sobelSignVector, sobelScaleVector);
+  var horizontal = this.separableConvolve(pixels, width, height, sobelScaleVector, sobelSignVector);
 
-  for (let i = 0; i < output.length; i += 4) {
-    let v = vertical[i];
-    let h = horizontal[i];
-    let p = Math.sqrt(h * h + v * v);
+  for (var i = 0; i < output.length; i += 4) {
+    var v = vertical[i];
+    var h = horizontal[i];
+    var p = Math.sqrt(h * h + v * v);
     output[i] = p;
     output[i + 1] = p;
     output[i + 2] = p;
@@ -321,4 +356,35 @@ Image.sobel = function(pixels, width, height) {
   return output;
 };
 
+/**
+ * Equalizes the histogram of a grayscale image, normalizing the
+ * brightness and increasing the contrast of the image.
+ * @param {pixels} pixels The grayscale pixels in a linear array.
+ * @param {number} width The image width.
+ * @param {number} height The image height.
+ * @return {array} The equalized grayscale pixels in a linear array.
+ */
+Image.equalizeHist = function(pixels, width, height){
+  var equalized = new Uint8ClampedArray(pixels.length);
+
+  var histogram = new Array(256);
+  for(var i=0; i < 256; i++) histogram[i] = 0;
+
+  for(var i=0; i < pixels.length; i++){
+    equalized[i] = pixels[i];
+    histogram[pixels[i]]++;
+  }
+
+  var prev = histogram[0];
+  for(var i=0; i < 256; i++){
+    histogram[i] += prev;
+    prev = histogram[i];
+  }
+
+  var norm = 255 / pixels.length;
+  for(var i=0; i < pixels.length; i++)
+    equalized[i] = (histogram[pixels[i]] * norm + 0.5) | 0;
+
+  return equalized;
+}
 module.exports = Image;
