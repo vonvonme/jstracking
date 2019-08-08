@@ -1,8 +1,9 @@
 const { Brief, Fast } = require('./features');
 const { TrackingMath, Matrix } = require('./math');
-const { ColorTracker, ObjectTracker, Tracker, TrackerTask } = require('./trackers');
+const { ColorTracker, LandmarkTracker, ObjectTracker, Tracker, TrackerTask } = require('./trackers');
 const { haar, ViolaJones } = require('./training');
 const { Canvas, DisjointSet, EventEmitter, Image, Scale } = require('./utils');
+const { LBF } = require('./alignment');
 
 if (typeof window === 'undefined') { window = {}; }
 if (typeof navigator === 'undefined') { navigator = {}; }
@@ -18,6 +19,8 @@ let tracking = Object.assign(window.tracking, {
   Fast,
   haar,
   Image,
+  LandmarkTracker,
+  LBF,
   Math: TrackingMath,
   Matrix,
   ObjectTracker,
